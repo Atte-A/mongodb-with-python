@@ -12,51 +12,90 @@ db = client["runningshoe"]
 
 print("\n*** Welcome to your personal running shoe manager ***")
 
+# CRUD operations for SHOES collection
 def list_shoes():
 
+  models_count = db.models.count_documents({})
+
+  if models_count == 0:
+    print("No shoe models in the database!")
+    return
+  
   models = db.models.find()
 
   for model in models:
    brand = db.brands.find_one({"_id": model["brand_id"]})
    print(brand["name"], model["name"])
 
-def list_brands():
-
-  brands = db.brands.find()
-
-  for brand in brands:
-    print(brand["name"])
-
 def add_shoe():
-  brand_name = input("Brand: ")
-  model_name = input("Model: ")
-  rating = float(input("Rating (0-10): "))
-  rotation = bool(input("Is this shoe in your current rotation (True/False): "))
+  brand_name = input("Brand: ").strip()
+  name_key = brand_name.lower()
+  # check if the brand exists
+  brand = db.brands.find_one({"name_key": name_key})
 
-  brand = db.brands.find_one({"name": brand_name})
-
-# Lisää tähän vielä tarkempaa brandin määrittelyä
+  # add_brand if does not exist
   if not brand:
-    brand_id = db.brands.insert_one({"name": brand_name}).inserted_id
-  else:
-    brand_id = brand["_id"]
+    print(f"Brand '{brand_name}' not found. Let's add it first.")
+    brand = add_brand()
+
+  model_name = input("Model: ").strip()
+  model_key = model_name.lower()
+
+  rating = float(input("Rating (0-10): "))
+  rotation = input("Is this shoe in your current rotation (true/false): ").lower() == "true"
 
   db.models.insert_one({
-    "brand_id": brand_id,
+    "brand_id": brand["_id"],
     "name": model_name,
+    "name_key": model_key,
     "rating": rating,
     "on_rotation": rotation
   })
 
-  print(f"\n{brand_name} {model_name} added into collection!")
+  print(f"\n'{brand_name} {model_name}' added into collection!")
 
-def add_brand():
+def update_shoe():
+  print("Shoe is updated!")
+
+def delete_shoe():
+  deleted_shoe = input("Shoe model to delete: ")
+
+  shoe = db.models.find_one({"name": deleted_shoe})
+
+  if not shoe:
+    print(f"No shoe model found with name '{deleted_shoe}'")
+    return
+
+  brand = db.brands.find_one({"_id": shoe["brand_id"]})
+  brand_name = brand["name"]
+
+  db.models.delete_one({"_id": shoe["_id"]})
+
+  print(f"'{brand_name} {deleted_shoe}' is deleted!")
+
+# CRUD operations for BRANDS collections
+def list_brands():
+
+  brands_count = db.brands.count_documents({})
+
+  if brands_count == 0:
+    print("No brands in the database!")
+    return
+
   brands = db.brands.find()
 
-  brand_name = input("Brand: ")
+  for brand in brands:
+    print(f"{brand['name']}, {brand['headquarters']['country']}")
 
-  brand = db.brands.find_one({"name": brand_name})
-  if brand in brands:
+def add_brand():
+  brand_name = input("Brand: ").strip()
+
+  name_key = brand_name.lower()
+
+  # check if existing
+  existing_brand = db.brands.find_one({"name_key": name_key})
+
+  if existing_brand:
     print(f"{brand_name} already exists in the database")
     return
 
@@ -65,18 +104,50 @@ def add_brand():
   website = input("Website: ")
   hq_city = input("In which city is their HQ? ")
   hq_country = input("In which country is their HQ? ")
-  active = bool(input(f"Is the {brand_name} still active company (True/False)? "))
+  active = input(f"Is {brand_name} still an active company (true/false)? ").lower() == "true"
 
-  db.brands.insert_one({"name": brand_name, "ceo": ceo, "established_year": established_year, "website": website, "headquarters": {"city": hq_city, "country": hq_country}, "active": active })
+  result = db.brands.insert_one({
+    "name": brand_name,
+    "name_key": name_key,
+    "ceo": ceo,
+    "established_year": established_year,
+    "website": website,
+    "headquarters": {
+        "city": hq_city,
+        "country": hq_country
+    },
+    "active": active
+  })
 
-  print(f"\n{brand_name} added to database!")
+  brand = db.brands.find_one({"_id": result.inserted_id})
 
-def update_shoe():
-  print("Shoe is updated!")
+  print(f"\n'{brand_name}' added to database!")
+  return brand
 
-def delete_shoe():
-  print("Shoe is deleted!")
+def update_brand():
+  print("Brand is updated!")
 
+def delete_brand():
+  deleted_brand = input("Brand to delete: ")
+
+  brand = db.brands.find_one({"name": deleted_brand})
+
+  if not brand:
+    print(f"No brand found with name '{deleted_brand}'")
+    return
+
+  model_exists = db.models.find_one({"brand_id": brand["_id"]})
+
+  if model_exists:
+    print(f"Cannot delete '{deleted_brand}' – shoe models still reference it")
+    return
+
+  result = db.brands.delete_one({"_id": brand["_id"]})
+
+  if result.deleted_count == 1:
+    print(f"'{deleted_brand}' is deleted!")
+
+# Commands to run the application
 def print_commands():
   print("\nCommands:")
   print("\n1. List shoes")
