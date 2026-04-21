@@ -25,7 +25,9 @@ def list_shoes():
 
   for model in models:
    brand = db.brands.find_one({"_id": model["brand_id"]})
-   print(brand["name"], model["name"])
+   print(f"\n{brand['name']}, {model['name']}")
+   print(f"Rating: {model['rating']}/10")
+   print(f"On rotation: {model['on_rotation']}")
 
 def add_shoe():
   brand_name = input("Brand: ").strip()
@@ -107,7 +109,12 @@ def list_brands():
   brands = db.brands.find()
 
   for brand in brands:
-    print(f"{brand['name']}, {brand['headquarters']['country']}")
+    print(f"\n{brand['name']}, {brand['headquarters']['country']}")
+    print(f"CEO: {brand['ceo']}")
+    print(f"Established: {brand['established_year']}")
+    print(f"Headquarters: {brand['headquarters']['city']}, {brand['headquarters']['country']}")
+    print(f"Website: {brand['website']}")
+    print(f"Active: {brand['active']}")
 
 def add_brand():
   brand_name = input("Brand: ").strip()
