@@ -1,6 +1,7 @@
 # 👟 Running Shoe Manager (CLI + MongoDB)
 
 A simple command-line application for managing running shoes using Python and MongoDB.  
+
 This project was built as part of a coursework assignment to practice CRUD operations, database design, and basic CLI application structure.
 
 ## 📌 Features  
