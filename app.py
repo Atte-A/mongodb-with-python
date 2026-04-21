@@ -1,5 +1,4 @@
 import os
-from bson import ObjectId
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
@@ -44,7 +43,7 @@ def add_shoe():
   model_key = model_name.lower()
 
   rating = float(input("Rating (0-10): "))
-  rotation = input("Is this shoe in your current rotation? (true/false): ").lower() == "true"
+  rotation = input("Is this shoe in your current rotation? (true/false): ").lower().strip() == "true"
 
   db.models.insert_one({
     "brand_id": brand["_id"],
@@ -82,9 +81,9 @@ def update_shoe():
   print(f"'{brand['name']} {shoe['name']}' is updated!")
 
 def delete_shoe():
-  deleted_shoe = input("Shoe model to delete: ")
+  deleted_shoe = input("Shoe model to delete: ").strip()
 
-  shoe = db.models.find_one({"name": deleted_shoe})
+  shoe = db.models.find_one({"name_key": deleted_shoe.lower()})
 
   if not shoe:
     print(f"No shoe model found with name '{deleted_shoe}'")
@@ -126,14 +125,14 @@ def add_brand():
 
   if existing_brand:
     print(f"{brand_name} already exists in the database")
-    return
+    return existing_brand
 
-  ceo = input("CEO: ")
+  ceo = input("CEO: ").strip()
   established_year = int(input("Established year: "))
-  website = input("Website: ")
-  hq_city = input("In which city is their HQ? ")
-  hq_country = input("In which country is their HQ? ")
-  active = input(f"Is {brand_name} still an active company (true/false)? ").lower() == "true"
+  website = input("Website: ").strip()
+  hq_city = input("In which city is their HQ? ").strip()
+  hq_country = input("In which country is their HQ? ").strip()
+  active = input(f"Is {brand_name} still an active company (true/false)? ").lower().strip() == "true"
 
   result = db.brands.insert_one({
     "name": brand_name,
@@ -159,13 +158,13 @@ def update_brand():
   brand = db.brands.find_one({"name_key": updated_brand.lower()})
 
   if not brand:
-    print(f"'{brand}' is not found")
+    print(f"'{updated_brand}' is not found")
     return
   
-  ceo = input(f"CEO of the '{brand['name']}'? ")
-  hq_city = input("In which city is their HQ? ")
-  hq_country = input("In which country is their HQ? ")
-  active = input(f"Is {brand['name']} still an active company (true/false)? ").lower() == "true"
+  ceo = input(f"CEO of the '{brand['name']}'? ").strip()
+  hq_city = input("In which city is their HQ? ").strip()
+  hq_country = input("In which country is their HQ? ").strip()
+  active = input(f"Is {brand['name']} still an active company (true/false)? ").lower().strip() == "true"
 
   db.brands.update_one(
     {"_id": brand["_id"]},
@@ -185,9 +184,9 @@ def update_brand():
   print(f"'{brand['name']}' is updated!")
 
 def delete_brand():
-  deleted_brand = input("Brand to delete: ")
+  deleted_brand = input("Brand to delete: ").strip()
 
-  brand = db.brands.find_one({"name": deleted_brand})
+  brand = db.brands.find_one({"name_key": deleted_brand.lower()})
 
   if not brand:
     print(f"No brand found with name '{deleted_brand}'")
