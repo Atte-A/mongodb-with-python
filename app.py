@@ -96,7 +96,7 @@ def delete_shoe():
 
   print(f"'{brand_name} {deleted_shoe}' is deleted!")
 
-# CRUD operations for BRANDS collections
+# CRUD operations for BRANDS collection
 def list_brands():
 
   brands_count = db.brands.count_documents({})
