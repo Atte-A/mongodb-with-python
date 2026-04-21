@@ -90,6 +90,9 @@ To use this project, you need to:
 - Basic data validation and input handling
 - Using MongoDB Atlas as a cloud database
 
+## 👤 Author
+Atte Ampuja [GitHub](https://www.github.com/Atte-A) | [LinkedIn](https://www.linkedin.com/in/atteampuja/)
+
 ## 📄 License
 This project is for educational purposes only.
 
