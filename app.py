@@ -42,7 +42,7 @@ def add_shoe():
   model_key = model_name.lower()
 
   rating = float(input("Rating (0-10): "))
-  rotation = input("Is this shoe in your current rotation (true/false): ").lower() == "true"
+  rotation = input("Is this shoe in your current rotation? (true/false): ").lower() == "true"
 
   db.models.insert_one({
     "brand_id": brand["_id"],
@@ -55,7 +55,29 @@ def add_shoe():
   print(f"\n'{brand_name} {model_name}' added into collection!")
 
 def update_shoe():
-  print("Shoe is updated!")
+  updated_shoe = input("Which shoe model you want to update? ").strip()
+
+  shoe = db.models.find_one({"name_key": updated_shoe.lower()})
+
+  if not shoe:
+    print(f"No shoe found with name '{updated_shoe}'")
+    return
+  rating = float(input("Rating (0-10): "))
+  rotation = input("Is this shoe in your current rotation? (true/false): ").lower() == "true"
+
+  db.models.update_one(
+    {"_id": shoe["_id"]},
+    {
+      "$set": {
+        "rating": rating,
+        "on_rotation": rotation
+      }
+    }
+  )
+
+  brand = db.brands.find_one({"_id": shoe["brand_id"]})
+
+  print(f"'{brand['name']} {shoe['name']}' is updated!")
 
 def delete_shoe():
   deleted_shoe = input("Shoe model to delete: ")
@@ -125,7 +147,35 @@ def add_brand():
   return brand
 
 def update_brand():
-  print("Brand is updated!")
+  updated_brand = input("Which brand you want to update? ").strip()
+
+  brand = db.brands.find_one({"name_key": updated_brand.lower()})
+
+  if not brand:
+    print(f"'{brand}' is not found")
+    return
+  
+  ceo = input(f"CEO of the '{brand['name']}'? ")
+  hq_city = input("In which city is their HQ? ")
+  hq_country = input("In which country is their HQ? ")
+  active = input(f"Is {brand['name']} still an active company (true/false)? ").lower() == "true"
+
+  db.brands.update_one(
+    {"_id": brand["_id"]},
+    {
+      "$set": {
+        "ceo": ceo,
+        "headquarters":
+        {
+          "city": hq_city,
+          "country": hq_country
+        },
+        "active": active
+      }
+    }
+  )
+
+  print(f"'{brand['name']}' is updated!")
 
 def delete_brand():
   deleted_brand = input("Brand to delete: ")
